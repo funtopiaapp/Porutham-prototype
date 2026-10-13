@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Porutham — Prototype v0.2</title>
+<style>
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans","Noto Sans Malayalam","Noto Sans Tamil","Noto Sans Devanagari",sans-serif;
+    background:#141210; color:#2B2118; min-height:100vh;
+    display:flex; justify-content:center; align-items:flex-start;
+  }
+  .serif{font-family:Georgia,"Noto Serif","Noto Serif Malayalam","Noto Serif Tamil","Noto Serif Devanagari",serif;}
+  /* ================= THEMES ================= */
+  .phone{
+    --bg:#FBF6EC; --bg2:#F5EDDC; --card:#FFFFFF; --line:#E9DCC3;
+    --ink:#2B2118; --ink-s:#6B5D4F; --brand:#701425; --brand-d:#4E0D1A;
+    --gold:#C9A227; --green:#2E7D4F; --amber:#B97A0C; --red:#B3372F;
+    --cta-bg:linear-gradient(135deg,#701425,#4E0D1A); --cta-text:#FFF8E7;
+    --track:#EADFC6; --tabbar:rgba(251,246,236,.94);
+    --note-bg:#FFFDF4; --price-bg:linear-gradient(135deg,#FFF8E2,#FBEFCB);
+    --on-dot:#FFFFFF; --shadow:0 10px 30px rgba(112,20,37,.10);
+    width:100%; max-width:430px; min-height:100vh; background:var(--bg); color:var(--ink);
+    position:relative; overflow:hidden; color-scheme:light;
+  }
+  .phone[data-theme="rose"]{
+    --bg:#FDF4F1; --bg2:#F8E7E1; --card:#FFFFFF; --line:#F0D5CC;
+    --ink:#33231F; --ink-s:#8A6F66; --brand:#8E2A3C; --brand-d:#5E1A28;
+    --gold:#C9862E; --cta-bg:linear-gradient(135deg,#8E2A3C,#5E1A28);
+    --track:#F0DCD2; --tabbar:rgba(253,244,241,.94); --note-bg:#FFFBF7;
+  }
+  .phone[data-theme="sage"]{
+    --bg:#F3F6EC; --bg2:#E8EEDD; --card:#FFFFFF; --line:#D9E2C6;
+    --ink:#26301F; --ink-s:#6E7A5F; --brand:#3F5B3A; --brand-d:#2A4028;
+    --gold:#B98A1D; --cta-bg:linear-gradient(135deg,#3F5B3A,#2A4028);
+    --track:#E0E7CF; --tabbar:rgba(243,246,236,.94); --note-bg:#FAFCF2;
+  }
+  .phone[data-theme="night"]{
+    --bg:#200F16; --bg2:#2C1620; --card:#2E1822; --line:#4E2C3A;
+    --ink:#F7ECD9; --ink-s:#C4A894; --brand:#C86A82; --brand-d:#8E2A44;
+    --gold:#D9A93F; --green:#6FCF97; --amber:#E8B34B; --red:#E5736A;
+    --cta-bg:linear-gradient(135deg,#C86A82,#8E2A44); --cta-text:#FFF6E8;
+    --track:#4E2C3A; --tabbar:rgba(32,15,22,.94);
+    --note-bg:#2A1620; --price-bg:linear-gradient(135deg,#3A2230,#2C1620);
+    --on-dot:#2A1620; --shadow:0 10px 30px rgba(0,0,0,.45);
+  }
+  .phone[data-theme="charcoal"]{
+    --bg:#161619; --bg2:#1F1F23; --card:#232328; --line:#38383F;
+    --ink:#F1EEE4; --ink-s:#A8A49A; --brand:#D9B545; --brand-d:#8A6D15;
+    --gold:#D9B545; --green:#6FCF97; --amber:#E8B34B; --red:#E5736A;
+    --cta-bg:linear-gradient(135deg,#D9B545,#A8821F); --cta-text:#241A05;
+    --track:#38383F; --tabbar:rgba(22,22,25,.94);
+    --note-bg:#1F1F23; --price-bg:linear-gradient(135deg,#2C2617,#1F1F23);
+    --on-dot:#1F1F23; --shadow:0 10px 30px rgba(0,0,0,.5);
+  }
+  .phone[data-theme="peacock"]{
+    --bg:#0E1B21; --bg2:#14242C; --card:#16272F; --line:#27424D;
+    --ink:#EAF4EF; --ink-s:#9DB8AC; --brand:#3AA586; --brand-d:#1D5C4D;
+    --gold:#D9B545; --green:#6FCF97; --amber:#E8B34B; --red:#E5736A;
+    --cta-bg:linear-gradient(135deg,#3AA586,#1D5C4D); --cta-text:#F2FFF9;
+    --track:#27424D; --tabbar:rgba(14,27,33,.94);
+    --note-bg:#14242C; --price-bg:linear-gradient(135deg,#1D363D,#14242C);
+    --on-dot:#14242C; --shadow:0 10px 30px rgba(0,0,0,.5);
+  }
+  @media(min-width:480px){
+    body{padding:28px 0;}
+    .phone{min-height:880px; height:880px; border-radius:44px; box-shadow:0 30px 80px rgba(0,0,0,.5); border:10px solid #1d1410;}
+  }
+  .kolam{
+    position:absolute; inset:0; pointer-events:none; opacity:.5;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23C9A227' stroke-opacity='.16' stroke-width='1.2'%3E%3Ccircle cx='60' cy='60' r='34'/%3E%3Ccircle cx='60' cy='60' r='6'/%3E%3Cpath d='M60 14v20M60 86v20M14 60h20M86 60h20'/%3E%3Ccircle cx='60' cy='60' r='46' stroke-dasharray='4 6'/%3E%3C/g%3E%3C/svg%3E");
+  }
+  /* ================= HEADER ================= */
+  .appheader{
+    position:absolute; top:0; left:0; right:0; z-index:15;
+    display:flex; align-items:center; gap:10px; padding:14px 14px 12px;
+    background:color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .iconbtn{
+    border:none; background:transparent; color:var(--ink); cursor:pointer;
+    width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    font-family:inherit;
+  }
+  .iconbtn:active{background:var(--bg2);}
+  .brand{display:flex; align-items:center; gap:10px; flex:1;}
+  .brand .mark{
+    width:38px;height:38px;border-radius:13px; background:linear-gradient(135deg,var(--brand),var(--brand-d));
+    display:flex;align-items:center;justify-content:center; color:var(--gold); font-size:20px;
+    box-shadow:var(--shadow); flex:none;
+  }
+  .brand b{font-size:18px; letter-spacing:.3px;}
+  .brand small{display:block; font-size:11px; color:var(--ink-s); font-weight:400;}
+  .langbtn{
+    border:1px solid var(--line); background:var(--card); border-radius:999px; padding:8px 14px;
+    font-size:13px; font-weight:700; color:var(--brand); cursor:pointer; font-family:inherit;
+  }
+  /* ================= DRAWER ================= */
+  .scrim{
+    position:absolute; inset:0; z-index:25; background:rgba(0,0,0,.45);
+    opacity:0; pointer-events:none; transition:opacity .3s;
+  }
+  .scrim.on{opacity:1; pointer-events:auto;}
+  .drawer{
+    position:absolute; top:0; bottom:0; left:0; width:300px; z-index:30;
+    background:var(--card); color:var(--ink);
+    transform:translateX(-105%); transition:transform .32s cubic-bezier(.22,1,.36,1);
+    display:flex; flex-direction:column; box-shadow:20px 0 50px rgba(0,0,0,.25);
+  }
+  .drawer.on{transform:none;}
+  .dhead{padding:22px 20px 14px; border-bottom:1px solid var(--line);}
+  .dhead .mark{
+    width:46px;height:46px;border-radius:15px; background:linear-gradient(135deg,var(--brand),var(--brand-d));
+    display:flex;align-items:center;justify-content:center; color:var(--gold); font-size:24px; margin-bottom:10px;
+  }
+  .dhead b{font-size:20px;} .dhead p{margin:4px 0 0; font-size:12.5px; color:var(--ink-s);}
+  .dbody{flex:1; overflow-y:auto; padding:10px 12px 20px;}
+  .ditem{
+    display:flex; align-items:center; gap:14px; width:100%; border:none; background:transparent;
+    padding:13px 12px; border-radius:13px; font-size:15px; font-weight:600; color:var(--ink);
+    cursor:pointer; font-family:inherit; text-align:left;
+  }
+  .ditem:active{background:var(--bg2);}
+  .ditem svg{flex:none; color:var(--brand);}
+  .dsec{font-size:11.5px; font-weight:700; color:var(--ink-s); text-transform:uppercase; letter-spacing:1px; margin:18px 8px 8px;}
+  .swatches{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  .swatch{
+    border:2px solid var(--line); background:var(--bg); border-radius:14px; padding:10px;
+    cursor:pointer; font-family:inherit; text-align:left;
+  }
+  .swatch.on{border-color:var(--gold); box-shadow:0 0 0 2px color-mix(in srgb, var(--gold) 35%, transparent);}
+  .swatch .dots{display:flex; gap:0; margin-bottom:8px;}
+  .swatch .dots i{width:26px; height:26px; border-radius:50%; border:2px solid var(--card); margin-right:-8px; display:block;}
+  .swatch b{font-size:12.5px; color:var(--ink); display:block;}
+  .swatch small{font-size:10.5px; color:var(--ink-s);}
+  .dlangs{display:flex; flex-wrap:wrap; gap:8px;}
+  .dfoot{padding:12px 20px 20px; font-size:11.5px; color:var(--ink-s); border-top:1px solid var(--line);}
+  /* ================= SCREENS ================= */
+  .screens{position:relative; z-index:1;}
+  .screen{display:none; padding:76px 20px 108px; animation:fade .35s ease; min-height:100%;}
+  .screen.active{display:block;}
+  @keyframes fade{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;}}
+  .backrow{margin-bottom:6px;}
+  .backlink{background:none;border:none;color:var(--brand);font-size:15px;font-weight:600;cursor:pointer;padding:6px 0;font-family:inherit;}
+  .hero{text-align:center; padding:10px 6px 6px;}
+  .diya{display:flex; justify-content:center; filter:drop-shadow(0 6px 12px rgba(201,162,39,.45));}
+  .hero h1{font-size:28px; margin:8px 0 6px; color:var(--brand-d); letter-spacing:.5px;}
+  .hero p{color:var(--ink-s); font-size:15px; line-height:1.55; margin:0 8px;}
+  .cta{
+    display:block; width:100%; border:none; cursor:pointer; margin-top:16px;
+    background:var(--cta-bg); color:var(--cta-text);
+    font-size:17px; font-weight:700; padding:16px; border-radius:18px;
+    box-shadow:0 12px 26px rgba(0,0,0,.18); letter-spacing:.2px; font-family:inherit;
+  }
+  .cta:active{transform:scale(.98);}
+  .cta.gold{background:linear-gradient(135deg,#D9B545,#B98A1D); color:#3A2A08;}
+  .ghost{
+    display:block; width:100%; background:transparent; border:1.5px solid var(--line);
+    color:var(--brand); font-size:15px; font-weight:600; padding:12px; border-radius:16px; margin-top:10px; cursor:pointer; font-family:inherit;
+  }
+  .trust{display:flex; gap:8px; margin-top:14px;}
+  .trust div{
+    flex:1; background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:10px 6px; text-align:center; font-size:11.5px; color:var(--ink-s); line-height:1.4;
+  }
+  .trust b{display:flex; justify-content:center; margin-bottom:6px;}
+  .sech{font-size:13px; font-weight:700; color:var(--ink-s); text-transform:uppercase; letter-spacing:1px; margin:18px 2px 8px;}
+  .hcard{
+    background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 16px;
+    display:flex; align-items:center; gap:14px; margin-bottom:10px; box-shadow:var(--shadow); cursor:pointer;
+    padding:12px 14px;
+  }
+  .hscore{
+    width:46px;height:46px;border-radius:50%; flex:none; display:flex;align-items:center;justify-content:center;
+    font-weight:800; font-size:16px; color:#fff;
+  }
+  .hcard b{font-size:15px;} .hcard small{color:var(--ink-s); font-size:12px;}
+  .hcard .go{margin-left:auto; color:var(--gold); font-size:20px;}
+  /* ---------- forms ---------- */
+  .stepbar{display:flex; gap:8px; margin:6px 0 4px;}
+  .stepbar i{flex:1; height:6px; border-radius:99px; background:var(--line);}
+  .stepbar i.on{background:linear-gradient(90deg,var(--gold),#D9B545);}
+  .steplabel{font-size:13px; color:var(--ink-s); font-weight:600; margin:6px 2px 10px;}
+  .field{margin-bottom:12px;}
+  .field label{display:block; font-size:14px; font-weight:700; margin-bottom:6px;}
+  .field input, .field select{
+    width:100%; font-size:16px; padding:13px 14px; border-radius:14px;
+    border:1.5px solid var(--line); background:var(--card); color:var(--ink); font-family:inherit;
+  }
+  .field input:focus{outline:none; border-color:var(--gold); box-shadow:0 0 0 3px color-mix(in srgb, var(--gold) 20%, transparent);}
+  .seg{display:flex; background:var(--bg2); border-radius:14px; padding:4px; gap:4px;}
+  .seg button{
+    flex:1; border:none; background:transparent; padding:11px; border-radius:11px;
+    font-size:15px; font-weight:600; color:var(--ink-s); cursor:pointer; font-family:inherit;
+  }
+  .seg button.on{background:var(--card); color:var(--brand); box-shadow:0 2px 8px rgba(0,0,0,.10);}
+  .checkline{
+    display:flex; gap:12px; align-items:flex-start; background:var(--card); border:1.5px solid var(--line);
+    border-radius:14px; padding:11px 13px; cursor:pointer; font-size:13.5px; line-height:1.45; color:var(--ink-s); margin-top:10px;
+  }
+  .checkline .box{
+    width:24px;height:24px;border-radius:8px;border:2px solid var(--gold); flex:none;
+    display:flex;align-items:center;justify-content:center; font-size:15px; color:#fff; margin-top:1px;
+  }
+  .checkline.on .box{background:var(--gold);}
+  .pickbtn{
+    display:flex; align-items:center; gap:12px; width:100%; background:var(--card);
+    border:1.5px dashed var(--gold); border-radius:14px; padding:12px 14px; margin-bottom:12px;
+    color:var(--brand); font-size:15px; font-weight:700; cursor:pointer; font-family:inherit;
+  }
+  .saveprof{
+    display:block; width:100%; background:transparent; border:none; color:var(--ink-s);
+    font-size:14px; font-weight:600; padding:8px; cursor:pointer; font-family:inherit; margin-top:4px;
+  }
+  /* ---------- analyzing ---------- */
+  .analyze{text-align:center; padding:30px 10px;}
+  .spin{
+    width:110px;height:110px;margin:0 auto 26px;border-radius:50%;
+    border:5px solid var(--line); border-top-color:var(--gold); animation:sp 1s linear infinite;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .spin svg{animation:sp 1s linear infinite reverse;}
+  @keyframes sp{to{transform:rotate(360deg);}}
+  .plist{text-align:left; max-width:300px; margin:0 auto;}
+  .plist div{
+    padding:10px 14px; border-radius:12px; margin-bottom:8px; background:var(--card);
+    border:1px solid var(--line); font-size:14px; display:flex; gap:10px; align-items:center;
+    opacity:.35; transition:all .3s;
+  }
+  .plist div.done{opacity:1; border-color:var(--gold);}
+  .plist .st{margin-left:auto; font-weight:800;}
+  /* ---------- results ---------- */
+  .couple{text-align:center; padding:8px 0 2px;}
+  .couple h2{font-size:21px; margin:6px 0 2px; color:var(--brand-d);}
+  .couple p{color:var(--ink-s); font-size:13px; margin:0;}
+  .ringwrap{display:flex; justify-content:center; margin:10px 0 4px;}
+  .verdict{
+    text-align:center; margin:10px auto 4px; display:inline-block; padding:9px 22px; border-radius:999px;
+    font-weight:800; font-size:15px; letter-spacing:.3px;
+  }
+  .v-great{background:color-mix(in srgb, var(--green) 16%, var(--card)); color:var(--green);}
+  .v-good{background:color-mix(in srgb, var(--amber) 18%, var(--card)); color:var(--amber);}
+  .v-avg{background:color-mix(in srgb, var(--red) 14%, var(--card)); color:var(--red);}
+  .reading{
+    background:var(--card); border:1px solid var(--line); border-radius:20px;
+    padding:14px; margin-top:10px; font-size:14.5px; line-height:1.65; box-shadow:var(--shadow);
+  }
+  .prow{
+    background:var(--card); border:1px solid var(--line); border-radius:16px; margin-bottom:10px; overflow:hidden;
+  }
+  .prow .head{display:flex; align-items:center; gap:12px; padding:12px 14px; cursor:pointer;}
+  .pdot{width:30px;height:30px;border-radius:50%; flex:none; display:flex;align-items:center;justify-content:center; font-size:15px; font-weight:800; color:var(--on-dot);}
+  .p-pass{background:var(--green);} .p-warn{background:var(--amber);} .p-fail{background:var(--red);}
+  .prow .head b{font-size:15px; flex:1;}
+  .prow .head .chev{color:var(--ink-s); font-size:13px; transition:transform .25s;}
+  .prow.open .head .chev{transform:rotate(180deg);}
+  .prow .body{display:none; padding:0 16px 16px 62px; font-size:14px; color:var(--ink-s); line-height:1.6;}
+  .prow.open .body{display:block;}
+  .note{
+    border-left:4px solid var(--gold); background:var(--note-bg); border-radius:0 14px 14px 0;
+    padding:12px 14px; font-size:13px; color:var(--ink-s); line-height:1.6; margin-top:12px;
+  }
+  .paybanner{
+    background:linear-gradient(135deg,var(--brand),var(--brand-d)); color:#FFF3D6; border-radius:20px;
+    padding:16px; margin-top:14px; text-align:center; box-shadow:var(--shadow);
+  }
+  .paybanner b{font-size:17px;} .paybanner p{font-size:13.5px; opacity:.9; margin:8px 0 14px; line-height:1.5;}
+  .paybanner button{
+    background:var(--gold); color:#3A2A08; border:none; font-weight:800; font-size:16px;
+    padding:14px 30px; border-radius:14px; cursor:pointer; width:100%; font-family:inherit;
+  }
+  .row2{display:flex; gap:10px; margin-top:12px;}
+  .row2 button{flex:1;}
+  /* ---------- paywall sheet ---------- */
+  .sheet{
+    background:var(--card); border-radius:28px 28px 0 0; padding:26px 24px 40px; margin:20px -20px -108px;
+    box-shadow:0 -12px 40px rgba(0,0,0,.22); position:relative; z-index:2;
+  }
+  .sheet .grab{width:46px;height:5px;border-radius:99px;background:var(--line);margin:0 auto 18px;}
+  .price{
+    background:var(--price-bg); border:2px solid var(--gold); border-radius:18px;
+    padding:18px; text-align:center; margin:16px 0;
+  }
+  .price .amt{font-size:38px; font-weight:800; color:var(--brand-d);}
+  .price small{color:var(--ink-s); font-size:13px;}
+  .feat{display:flex; gap:12px; align-items:flex-start; margin-bottom:13px; font-size:14.5px; line-height:1.5;}
+  .feat span{color:var(--green); font-weight:800; font-size:17px;}
+  .fine{font-size:12px; color:var(--ink-s); text-align:center; margin-top:14px; line-height:1.6;}
+  /* ---------- profiles ---------- */
+  .pcard{
+    background:var(--card); border:1px solid var(--line); border-radius:16px; padding:15px 16px;
+    display:flex; align-items:center; gap:13px; margin-bottom:10px; box-shadow:var(--shadow);
+  }
+  .pavatar{
+    width:48px;height:48px;border-radius:50%; flex:none; display:flex;align-items:center;justify-content:center;
+    font-weight:800; font-size:19px; color:#fff;
+  }
+  .pcard .meta{flex:1;} .pcard .meta b{font-size:15.5px;}
+  .pcard .meta small{color:var(--ink-s); font-size:12.5px; display:block; margin-top:2px;}
+  .rolebadge{
+    display:inline-block; font-size:10.5px; font-weight:800; letter-spacing:.6px; text-transform:uppercase;
+    padding:3px 10px; border-radius:999px; margin-top:5px;
+  }
+  .rb-bride{background:color-mix(in srgb, var(--brand) 14%, var(--card)); color:var(--brand);}
+  .rb-groom{background:color-mix(in srgb, var(--gold) 22%, var(--card)); color:var(--amber);}
+  .pact{border:none; background:transparent; cursor:pointer; color:var(--ink-s); padding:8px; border-radius:10px; font-family:inherit;}
+  .pact:active{background:var(--bg2);}
+  .empty{
+    text-align:center; padding:36px 20px; color:var(--ink-s); font-size:14px; line-height:1.6;
+    border:1.5px dashed var(--line); border-radius:16px; margin-bottom:12px;
+  }
+  /* ---------- bottom sheet (profile picker) ---------- */
+  .bsheet{
+    position:absolute; left:0; right:0; bottom:0; z-index:30; max-height:72%;
+    background:var(--card); border-radius:26px 26px 0 0; padding:14px 20px 34px;
+    transform:translateY(105%); transition:transform .32s cubic-bezier(.22,1,.36,1);
+    box-shadow:0 -14px 44px rgba(0,0,0,.28); display:flex; flex-direction:column;
+  }
+  .bsheet.on{transform:none;}
+  .bsheet .grab{width:46px;height:5px;border-radius:99px;background:var(--line);margin:2px auto 12px;}
+  .bsheet h3{margin:0 0 4px; font-size:18px;}
+  .bsheet .blist{overflow-y:auto;}
+  .brow{
+    display:flex; align-items:center; gap:13px; width:100%; text-align:left;
+    background:var(--bg); border:1px solid var(--line); border-radius:14px; padding:12px 14px;
+    margin-bottom:9px; cursor:pointer; font-family:inherit; color:var(--ink);
+  }
+  .brow:active{border-color:var(--gold);}
+  .brow .meta{flex:1;} .brow .meta b{font-size:15px;} .brow .meta small{color:var(--ink-s); font-size:12px;}
+  /* ---------- toast ---------- */
+  .toast{
+    position:absolute; left:50%; bottom:110px; transform:translateX(-50%) translateY(20px); z-index:40;
+    background:var(--ink); color:var(--bg); font-size:14px; font-weight:600;
+    padding:12px 22px; border-radius:999px; opacity:0; pointer-events:none; transition:all .3s;
+    white-space:nowrap; box-shadow:0 8px 24px rgba(0,0,0,.25);
+  }
+  .toast.on{opacity:1; transform:translateX(-50%);}
+  /* ---------- bottom nav ---------- */
+  .tabbar{
+    position:absolute; bottom:0; left:0; right:0; z-index:15;
+    background:var(--tabbar); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    border-top:1px solid var(--line); display:flex; padding:10px 8px calc(14px + env(safe-area-inset-bottom));
+  }
+  .tabbar button{
+    flex:1; border:none; background:none; font-size:10.5px; color:var(--ink-s); font-weight:600;
+    display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; font-family:inherit;
+  }
+  .tabbar button i{font-style:normal; display:flex; align-items:center;}
+  .tabbar button.on{color:var(--brand);}
+  .demo-tag{
+    position:absolute; top:74px; right:14px; z-index:9; background:var(--brand); color:#FFE9A8;
+    font-size:10.5px; font-weight:700; padding:5px 11px; border-radius:999px; letter-spacing:.6px;
+  }
+  /* ---------- print (Share as PDF) ---------- */
+  #printArea{display:none;}
+  @media print{
+    body{display:block; background:#fff; padding:0;}
+    body > :not(#printArea){display:none !important;}
+    #printArea{display:block; color:#222; padding:8px;
+      font-family:Georgia,"Noto Serif","Noto Serif Malayalam","Noto Serif Tamil","Noto Serif Devanagari",serif;}
+    .pc-head{display:flex; align-items:baseline; justify-content:space-between; border-bottom:3px solid #701425; padding-bottom:10px;}
+    .pc-brand{font-size:26px; font-weight:800; color:#701425;}
+    .pc-tag{font-size:12px; color:#666; font-family:-apple-system,"Segoe UI",sans-serif;}
+    .pc-title{text-align:center; margin:18px 0 4px; font-size:30px; color:#222;}
+    .pc-stars{text-align:center; color:#666; font-size:14px; margin-bottom:10px; font-family:-apple-system,"Segoe UI",sans-serif;}
+    .pc-score{text-align:center; font-size:54px; font-weight:800; color:#701425;}
+    .pc-score small{font-size:20px; color:#666; font-weight:400;}
+    .pc-verdict{text-align:center; margin:8px 0 14px;}
+    .pc-verdict span{display:inline-block; padding:8px 26px; border-radius:999px; font-weight:800; border:2px solid #701425; color:#701425; font-family:-apple-system,"Segoe UI",sans-serif;}
+    .pc-reading{font-size:14px; line-height:1.65; margin:0 0 16px; font-family:-apple-system,"Segoe UI",sans-serif;}
+    .pc-table{width:100%; border-collapse:collapse; font-size:13.5px; margin-bottom:16px; font-family:-apple-system,"Segoe UI",sans-serif;}
+    .pc-table th{text-align:left; padding:9px 10px; background:#f4efe4; border-bottom:2px solid #701425;}
+    .pc-table td{padding:8px 10px; border-bottom:1px solid #e5ddc9; vertical-align:top;}
+    .pc-table td.mk{width:34px; text-align:center; font-weight:800; font-size:16px;}
+    .pc-note{font-size:12.5px; color:#555; border-left:4px solid #C9A227; padding:10px 14px; margin-bottom:18px; line-height:1.6; font-family:-apple-system,"Segoe UI",sans-serif;}
+    .pc-foot{text-align:center; font-size:11.5px; color:#888; border-top:1px solid #ddd; padding-top:10px; font-family:-apple-system,"Segoe UI",sans-serif;}
+  }
+</style>
+</head>
+<body>
+<div class="phone" data-theme="ivory" id="phone">
+  <div class="kolam"></div>
+  <div class="demo-tag">DESIGN PROTOTYPE</div>
+
+  <!-- persistent header -->
+  <header class="appheader">
+    <button class="iconbtn" onclick="toggleDrawer(true)" aria-label="Menu">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <div class="brand"><div class="mark">☀</div><div><b class="serif">Porutham</b><small data-t="tagline">Timeless compatibility</small></div></div>
+    <button class="langbtn" onclick="cycleLang()" id="langBtn">EN</button>
+  </header>
+
+  <div class="scrim" id="scrim" onclick="closeOverlays()"></div>
+
+  <!-- hamburger drawer -->
+  <aside class="drawer" id="drawer" aria-label="Menu">
+    <div class="dhead">
+      <div class="mark">☀</div>
+      <b class="serif">Porutham</b>
+      <p data-t="tagline">Timeless compatibility</p>
+    </div>
+    <div class="dbody">
+      <button class="ditem" onclick="nav('s-home')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg><span data-t="home">Home</span></button>
+      <button class="ditem" onclick="nav('s-p1')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg><span data-t="newcheck">New Check</span></button>
+      <button class="ditem" onclick="nav('s-profiles')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.8"/><path d="M16 14.6c2.8.4 5 2.6 5 5.4"/></svg><span data-t="profiles">Bride &amp; Groom Profiles</span></button>
+      <button class="ditem" onclick="nav('s-hist')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span data-t="saved">Saved checks</span></button>
+      <button class="ditem" onclick="nav('s-how')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.3a2.6 2.6 0 1 1 3.6 2.4c-.9.4-1.1 1-1.1 1.8"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg><span data-t="how">How matching works</span></button>
+      <div class="dsec" data-t="appearance">Appearance</div>
+      <div class="swatches" id="swatches"></div>
+      <div class="dsec" data-t="language">Language</div>
+      <div class="dlangs" id="dlangs"></div>
+      <div class="dsec" data-t="more">More</div>
+      <button class="ditem" onclick="nav('s-privacy')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6z"/></svg><span data-t="privacy">Privacy &amp; About</span></button>
+      <button class="ditem" onclick="toast(t('storedemo'))"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9v10h16V9"/><path d="M4 9l2-5h12l2 5"/><path d="M10 13v4M14 13v4"/></svg><span data-t="restore">Restore Purchases</span></button>
+      <button class="ditem" onclick="toast(t('sharedemo'))"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 10.8l7.6-3.6M8.2 13.2l7.6 3.6"/></svg><span data-t="shareapp">Share the App</span></button>
+    </div>
+    <div class="dfoot" data-t="version">Porutham · Design prototype v0.2</div>
+  </aside>
+
+  <!-- profile picker bottom sheet -->
+  <div class="bsheet" id="pickSheet">
+    <div class="grab"></div>
+    <h3 data-t="chooseprofile">Choose saved profile</h3>
+    <p style="color:var(--ink-s); font-size:13px; margin:0 0 12px" id="pickSub"></p>
+    <div class="blist" id="pickList"></div>
+    <button class="ghost" onclick="closeOverlays()" data-t="cancel">Cancel</button>
+  </div>
+
+  <!-- share bottom sheet -->
+  <div class="bsheet" id="shareSheet">
+    <div class="grab"></div>
+    <h3 data-t="share">Share</h3>
+    <p style="color:var(--ink-s); font-size:13px; margin:0 0 12px" data-t="sharenote">A beautiful one-page summary of this match.</p>
+    <div class="blist">
+      <button class="brow" style="color:var(--brand)" onclick="doPrint()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l4 4v14H6z"/><path d="M9 3v5h6V3"/><path d="M9 17h6v4H9z"/></svg>
+        <div class="meta"><b data-t="savepdf">Save as PDF</b><br><small data-t="pdfsub">Via your device's print dialog</small></div>
+      </button>
+    </div>
+    <button class="ghost" onclick="closeOverlays()" data-t="cancel">Cancel</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="screens">
+  <!-- ============ HOME ============ -->
+  <section class="screen active" id="s-home">
+    <div class="hero">
+      <div class="diya"><svg width="52" height="52" viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="32" cy="45" rx="23" ry="10" fill="#7A3E16"/><ellipse cx="32" cy="42" rx="18" ry="7" fill="#A86A2E"/><ellipse cx="32" cy="40" rx="12" ry="4.5" fill="#C98A3E"/><path d="M32 36C27.5 28 29.5 20 32 13c2.5 7 4.5 15 0 23z" fill="#F2A93B"/><path d="M32 31c-2.4-4.6-1.4-9.4 0-13.4 1.4 4 2.4 8.8 0 13.4z" fill="#FFE9A8"/></svg></div>
+      <h1 class="serif" data-t="hero">Know before you say yes</h1>
+      <p data-t="herosub">Classical 10-porutham matching, computed honestly — no fear, no superstition, just the texts.</p>
+      <button class="cta" onclick="go('s-p1')" data-t="check">Check Porutham →</button>
+      <button class="ghost" onclick="go('s-profiles')" data-t="profiles">Bride &amp; Groom Profiles</button>
+      <button class="ghost" onclick="go('s-how')" data-t="how">How matching works</button>
+      <div class="trust">
+        <div><b><svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="stroke:var(--brand)" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></b><span data-t="t1">Private — nothing leaves your phone</span></div>
+        <div><b><svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="stroke:var(--brand)" stroke-width="2"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h7"/></svg></b><span data-t="t2">From classical texts, not guesswork</span></div>
+        <div><b><svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="stroke:var(--brand)" stroke-width="2"><path d="M12 21C7 16.5 3 13 3 8.8 3 6 5.2 4 7.8 4c1.7 0 3.2.9 4.2 2.3C13 4.9 14.5 4 16.2 4 18.8 4 21 6 21 8.8c0 4.2-4 7.7-9 12.2z"/></svg></b><span data-t="t3">Honest results, never fear</span></div>
+      </div>
+    </div>
+    <div class="sech" data-t="recent">Recent checks</div>
+    <div id="historyHome"></div>
+  </section>
+
+  <!-- ============ HOW IT WORKS ============ -->
+  <section class="screen" id="s-how">
+    <div class="backrow"><button class="backlink" onclick="go('s-home')">‹ <span data-t="back">Back</span></button></div>
+    <div class="hero" style="padding-top:4px">
+      <div class="diya"><svg width="52" height="52" viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="32" cy="45" rx="23" ry="10" fill="#7A3E16"/><ellipse cx="32" cy="42" rx="18" ry="7" fill="#A86A2E"/><ellipse cx="32" cy="40" rx="12" ry="4.5" fill="#C98A3E"/><path d="M32 36C27.5 28 29.5 20 32 13c2.5 7 4.5 15 0 23z" fill="#F2A93B"/><path d="M32 31c-2.4-4.6-1.4-9.4 0-13.4 1.4 4 2.4 8.8 0 13.4z" fill="#FFE9A8"/></svg></div>
+      <h1 class="serif" style="font-size:28px" data-t="how">How matching works</h1>
+    </div>
+    <div class="reading" data-t="howbody"></div>
+    <button class="cta" onclick="go('s-p1')" data-t="check">Check Porutham →</button>
+  </section>
+
+  <!-- ============ PARTNER 1 ============ -->
+  <section class="screen" id="s-p1">
+    <div class="backrow"><button class="backlink" onclick="go('s-home')">‹ <span data-t="back">Back</span></button></div>
+    <div class="stepbar"><i class="on"></i><i></i></div>
+    <div class="steplabel"><span data-t="step1">Step 1 of 2</span> · <span data-t="person1">First person</span></div>
+    <button class="pickbtn" onclick="openPicker('p1')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.8"/><path d="M16 14.6c2.8.4 5 2.6 5 5.4"/></svg>
+      <span data-t="chooseprofile">Choose saved profile</span>
+    </button>
+    <div class="field"><label data-t="name">Name</label><input id="n1" data-ph="nameph" placeholder="e.g. Aditya"></div>
+    <div class="field"><label data-t="gender">Gender</label>
+      <div class="seg" id="g1"><button class="on" data-t="male">Male</button><button data-t="female">Female</button></div>
+    </div>
+    <div class="field"><label data-t="dob">Date of birth</label><input type="date" id="d1" value="1998-04-14"></div>
+    <div class="field"><label data-t="tob">Time of birth</label><input type="time" id="t1" value="10:30">
+      <div class="checkline" id="u1" onclick="this.classList.toggle('on')"><div class="box">✓</div><span data-t="unknowntime">I don't know the exact time — match using date only</span></div>
+    </div>
+    <div class="field"><label data-t="pob">Place of birth</label><input id="p1" data-ph="pobph" placeholder="e.g. Kochi"></div>
+    <button class="cta" onclick="go('s-p2')" data-t="continue">Continue →</button>
+    <button class="saveprof" onclick="saveAsProfile('p1')">＋ <span data-t="saveprofile">Save as profile</span></button>
+  </section>
+
+  <!-- ============ PARTNER 2 ============ -->
+  <section class="screen" id="s-p2">
+    <div class="backrow"><button class="backlink" onclick="go('s-p1')">‹ <span data-t="back">Back</span></button></div>
+    <div class="stepbar"><i class="on"></i><i class="on"></i></div>
+    <div class="steplabel"><span data-t="step2">Step 2 of 2</span> · <span data-t="person2">Second person</span></div>
+    <button class="pickbtn" onclick="openPicker('p2')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.8"/><path d="M16 14.6c2.8.4 5 2.6 5 5.4"/></svg>
+      <span data-t="chooseprofile">Choose saved profile</span>
+    </button>
+    <div class="field"><label data-t="name">Name</label><input id="n2" data-ph="nameph" placeholder="e.g. Diya"></div>
+    <div class="field"><label data-t="gender">Gender</label>
+      <div class="seg" id="g2"><button data-t="male">Male</button><button class="on" data-t="female">Female</button></div>
+    </div>
+    <div class="field"><label data-t="dob">Date of birth</label><input type="date" id="d2" value="2000-09-02"></div>
+    <div class="field"><label data-t="tob">Time of birth</label><input type="time" id="t2" value="18:15">
+      <div class="checkline" id="u2" onclick="this.classList.toggle('on')"><div class="box">✓</div><span data-t="unknowntime">I don't know the exact time — match using date only</span></div>
+    </div>
+    <div class="field"><label data-t="pob">Place of birth</label><input id="p2" data-ph="pobph" placeholder="e.g. Madurai"></div>
+    <button class="cta gold" onclick="analyze()" data-t="seeresult">See Compatibility</button>
+    <button class="saveprof" onclick="saveAsProfile('p2')">＋ <span data-t="saveprofile">Save as profile</span></button>
+  </section>
+
+  <!-- ============ ANALYZING ============ -->
+  <section class="screen" id="s-run">
+    <div class="analyze">
+      <div class="spin"><svg width="40" height="40" viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="32" cy="45" rx="23" ry="10" fill="#7A3E16"/><ellipse cx="32" cy="42" rx="18" ry="7" fill="#A86A2E"/><ellipse cx="32" cy="40" rx="12" ry="4.5" fill="#C98A3E"/><path d="M32 36C27.5 28 29.5 20 32 13c2.5 7 4.5 15 0 23z" fill="#F2A93B"/><path d="M32 31c-2.4-4.6-1.4-9.4 0-13.4 1.4 4 2.4 8.8 0 13.4z" fill="#FFE9A8"/></svg></div>
+      <h2 class="serif" style="color:var(--brand-d)" data-t="analyzing">Reading the stars…</h2>
+      <div class="plist" id="plist"></div>
+    </div>
+  </section>
+
+  <!-- ============ RESULTS ============ -->
+  <section class="screen" id="s-res">
+    <div class="backrow"><button class="backlink" onclick="go('s-home')">‹ <span data-t="home">Home</span></button></div>
+    <div class="couple">
+      <p data-t="matchof">Compatibility</p>
+      <h2 class="serif" id="rNames">Aditya ♥ Diya</h2>
+      <p id="rStars">Aswini × Anusham</p>
+    </div>
+    <div class="ringwrap">
+      <svg width="140" height="140" viewBox="0 0 170 170" role="img" aria-label="compatibility score">
+        <circle cx="85" cy="85" r="72" fill="none" style="stroke:var(--track)" stroke-width="14"/>
+        <circle id="ring" cx="85" cy="85" r="72" fill="none" stroke="url(#gg)" stroke-width="14"
+          stroke-linecap="round" stroke-dasharray="452.4" stroke-dashoffset="452.4"
+          transform="rotate(-90 85 85)" style="transition:stroke-dashoffset 1.4s cubic-bezier(.22,1,.36,1)"/>
+        <defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#C9A227"/><stop offset="1" stop-color="#701425"/>
+        </linearGradient></defs>
+        <text id="rScore" x="85" y="82" text-anchor="middle" font-size="38" font-weight="800" style="fill:var(--brand-d)">–</text>
+        <text x="85" y="106" text-anchor="middle" font-size="13" style="fill:var(--ink-s)" data-t="outof">out of 10</text>
+      </svg>
+    </div>
+    <div style="text-align:center"><span class="verdict v-great" id="rVerdict">Excellent Match</span></div>
+    <div class="reading" id="rReading"></div>
+    <div class="sech" data-t="tenp">The 10 poruthams</div>
+    <div id="rList"></div>
+    <div class="note" data-t="honestnote"></div>
+    <div class="paybanner" id="payBanner">
+      <b data-t="freeused">Your free check is complete</b>
+      <p data-t="freeusedsub">Unlock unlimited porutham checks for the whole family — one payment, forever.</p>
+      <button onclick="go('s-pay')" data-t="unlock">Unlock Unlimited</button>
+    </div>
+    <div class="row2">
+      <button class="ghost" onclick="openShare()">↗ <span data-t="share">Share</span></button>
+      <button class="ghost" onclick="saveCheck();go('s-home')">＋ <span data-t="newcheck">New Check</span></button>
+    </div>
+  </section>
+
+  <!-- ============ PAYWALL ============ -->
+  <section class="screen" id="s-pay">
+    <div class="backrow"><button class="backlink" onclick="go('s-res')">‹ <span data-t="back">Back</span></button></div>
+    <div class="sheet">
+      <div class="grab"></div>
+      <div style="text-align:center"><div style="display:flex;justify-content:center"><svg width="44" height="44" viewBox="0 0 24 24" style="fill:var(--gold)" aria-hidden="true"><path d="M12 21C7 16.5 3 13 3 8.8 3 6 5.2 4 7.8 4c1.7 0 3.2.9 4.2 2.3C13 4.9 14.5 4 16.2 4 18.8 4 21 6 21 8.8c0 4.2-4 7.7-9 12.2z"/></svg></div>
+        <h2 class="serif" style="color:var(--brand-d); margin:8px 0 4px" data-t="unlimited">Unlimited Porutham</h2>
+        <p style="color:var(--ink-s); font-size:14px; margin:0" data-t="unlimitedsub">For every alliance your family considers</p>
+      </div>
+      <div style="margin-top:16px">
+        <div class="feat"><span>✓</span><span data-t="f1">Unlimited compatibility checks</span></div>
+        <div class="feat"><span>✓</span><span data-t="f2">Full detail on all 10 poruthams</span></div>
+        <div class="feat"><span>✓</span><span data-t="f3">Save &amp; compare alliances</span></div>
+        <div class="feat"><span>✓</span><span data-t="f4">Works in 4 languages, fully offline</span></div>
+      </div>
+      <div class="price"><div class="amt" id="priceAmt">₹199</div><small data-t="onetime">one-time · yours forever · no subscription</small></div>
+      <button class="cta" onclick="toast(t('storedemo'))" data-t="buynow">Continue</button>
+      <button class="ghost" onclick="go('s-res')" data-t="notnow">Not now</button>
+      <div class="fine" data-t="fineprint"></div>
+    </div>
+  </section>
+
+  <!-- ============ PROFILES ============ -->
+  <section class="screen" id="s-profiles">
+    <div class="sech" style="margin-top:0" data-t="profiles">Bride &amp; Groom Profiles</div>
+    <div class="seg" id="ptabs" style="margin-bottom:16px">
+      <button class="on" onclick="setPTab('bride')" data-t="brides">Brides</button>
+      <button onclick="setPTab('groom')" data-t="grooms">Grooms</button>
+    </div>
+    <div id="profileList"></div>
+    <button class="cta" id="addProfBtn" onclick="openProfileEditor()">＋ <span data-t="addprofile">Add profile</span></button>
+  </section>
+
+  <!-- ============ PROFILE EDITOR ============ -->
+  <section class="screen" id="s-pedit">
+    <div class="backrow"><button class="backlink" onclick="go('s-profiles')">‹ <span data-t="back">Back</span></button></div>
+    <div class="sech" style="margin-top:0" id="peTitle">Profile</div>
+    <div class="field"><label data-t="name">Name</label><input id="pe_name" data-ph="nameph" placeholder="e.g. Aditya"></div>
+    <div class="field"><label data-t="role">Role</label>
+      <div class="seg" id="pe_role"><button data-t="bride">Bride</button><button data-t="groom">Groom</button></div>
+    </div>
+    <div class="field"><label data-t="dob">Date of birth</label><input type="date" id="pe_dob"></div>
+    <div class="field"><label data-t="tob">Time of birth</label><input type="time" id="pe_tob">
+      <div class="checkline" id="pe_u" onclick="this.classList.toggle('on')"><div class="box">✓</div><span data-t="unknowntime">I don't know the exact time — match using date only</span></div>
+    </div>
+    <div class="field"><label data-t="pob">Place of birth</label><input id="pe_place" data-ph="pobph" placeholder="e.g. Kochi"></div>
+    <button class="cta" onclick="saveProfileEditor()" data-t="save">Save</button>
+  </section>
+
+  <!-- ============ HISTORY ============ -->
+  <section class="screen" id="s-hist">
+    <div class="sech" style="margin-top:0" data-t="saved">Saved checks</div>
+    <div id="historyList"></div>
+    <button class="cta" onclick="go('s-p1')" data-t="check">Check Porutham →</button>
+  </section>
+
+  <!-- ============ PRIVACY ============ -->
+  <section class="screen" id="s-privacy">
+    <div class="backrow"><button class="backlink" onclick="go('s-home')">‹ <span data-t="back">Back</span></button></div>
+    <div class="hero" style="padding-top:4px">
+      <div class="diya"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" style="stroke:var(--brand)" stroke-width="2"><path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6z"/></svg></div>
+      <h1 class="serif" style="font-size:28px" data-t="privacy">Privacy &amp; About</h1>
+    </div>
+    <div class="reading" data-t="privacybody"></div>
+  </section>
+  </div><!-- /screens -->
+
+  <nav class="tabbar">
+    <button class="on" id="tab-home" onclick="go('s-home')"><i><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></i><span data-t="home">Home</span></button>
+    <button id="tab-new" onclick="go('s-p1')"><i><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg></i><span data-t="newcheck">New Check</span></button>
+    <button id="tab-prof" onclick="go('s-profiles')"><i><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.8"/><path d="M16 14.6c2.8.4 5 2.6 5 5.4"/></svg></i><span data-t="profiles">Profiles</span></button>
+    <button id="tab-hist" onclick="go('s-hist')"><i><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></i><span data-t="saved">Saved</span></button>
+  </nav>
+</div>
+<div id="printArea"></div>
+
+<script>
+/* ================= i18n ================= */
+const T = {
+en:{tagline:"Timeless compatibility",hero:"Know before you say yes",herosub:"Classical 10-porutham matching, computed honestly — no fear, no superstition, just the texts.",check:"Check Porutham →",how:"How matching works",howbody:"South Indian tradition compares the couple's Moon stars across <b>10 poruthams</b> — daily harmony, temperament, growth, attraction, emotional bond and more. Each gets a clear pass or fail, and the total out of 10 tells you where you stand. A low score is not a curse; it simply means the match needs more understanding.",t1:"Private — nothing leaves your phone",t2:"From classical texts, not guesswork",t3:"Honest results, never fear",recent:"Recent checks",back:"Back",home:"Home",newcheck:"New Check",saved:"Saved checks",profiles:"Bride & Groom Profiles",brides:"Brides",grooms:"Grooms",bride:"Bride",groom:"Groom",step1:"Step 1 of 2",step2:"Step 2 of 2",person1:"First person",person2:"Second person",name:"Name",nameph:"e.g. Aditya",gender:"Gender",role:"Role",male:"Male",female:"Female",dob:"Date of birth",tob:"Time of birth",unknowntime:"I don't know the exact time — match using date only",pob:"Place of birth",pobph:"e.g. Kochi",continue:"Continue →",seeresult:"See Compatibility",analyzing:"Reading the stars…",matchof:"Compatibility",outof:"out of 10",tenp:"The 10 poruthams",honestnote:"<b>An honest note:</b> porutham measures natural harmony, not destiny. A lower score calls for understanding and conversation — never fear. No match is \"cursed\".",freeused:"Your free check is complete",freeusedsub:"Unlock unlimited porutham checks for the whole family — one payment, forever.",unlock:"Unlock Unlimited",share:"Share",sharedemo:"Demo: result shared as a beautiful card",unlimited:"Unlimited Porutham",unlimitedsub:"For every alliance your family considers",f1:"Unlimited compatibility checks",f2:"Full detail on all 10 poruthams",f3:"Save & compare alliances",f4:"Works in 4 languages, fully offline",onetime:"one-time · yours forever · no subscription",buynow:"Continue",notnow:"Not now",fineprint:"Secure payment via the App Store. First check is always free.<br>Restore purchases anytime.",storedemo:"Demo: App Store purchase sheet would open here",appearance:"Appearance",language:"Language",more:"More",chooseprofile:"Choose saved profile",saveprofile:"Save as profile",profilesaved:"Profile saved",edit:"Edit",delete:"Delete",cancel:"Cancel",save:"Save",addprofile:"Add profile",nobrides:"No brides saved yet — add your first below.",nogrooms:"No grooms saved yet — add your first below.",privacy:"Privacy & About",privacybody:"<b>Everything is computed on your device.</b><br><br>Birth details never leave your phone, are never stored on any server, and are never sold or shared. Results follow the classical texts honestly — no fear, no curses, no remedies. Porutham measures natural harmony, not destiny.",restore:"Restore Purchases",shareapp:"Share the App",version:"Porutham · Design prototype v0.2",newprofile:"New profile",editprofile:"Edit profile",sharenote:"A beautiful one-page summary of this match.",savepdf:"Save as PDF",pdfsub:"Via your device's print dialog"},
+ml:{tagline:"കാലാതീതമായ പൊരുത്തം",hero:"സമ്മതം പറയുന്നതിന് മുൻപ് അറിയൂ",herosub:"പത്തു പൊരുത്തങ്ങളുടെ ക്ലാസിക്കൽ കണക്ക് — ഭയമില്ല, മൂഢവിശ്വാസമില്ല, ശാസ്ത്രം മാത്രം.",check:"പൊരുത്തം നോക്കൂ →",how:"പൊരുത്തം എങ്ങനെ",howbody:"ദക്ഷിണേന്ത്യൻ സമ്പ്രദായത്തിൽ വധൂവരന്മാരുടെ ചന്ദ്ര നക്ഷത്രങ്ങളെ <b>10 പൊരുത്തങ്ങളിൽ</b> താരതമ്യം ചെയ്യുന്നു — ദിനചര്യ, സ്വഭാവം, വളർച്ച, ആകർഷണം, മാനസിക ബന്ധം തുടങ്ങിയവ. ഓരോന്നിനും വ്യക്തമായ ജയം/തോൽവി; 10-ൽ ആകെ സ്കോർ നിങ്ങളുടെ നില പറയും. കുറഞ്ഞ സ്കോർ ശാപമല്ല — കൂടുതൽ പരസ്പര ധാരണ വേണം എന്ന് മാത്രം.",t1:"സ്വകാര്യം — ഫോൺ വിട്ട് ഒന്നും പോകില്ല",t2:"ഊഹമല്ല, ശാസ്ത്രഗ്രന്ഥങ്ങളിൽ നിന്ന്",t3:"സത്യസന്ധമായ ഫലം, ഭയമില്ല",recent:"സമീപകാല പരിശോധനകൾ",back:"പിന്നോട്ട്",home:"ഹോം",newcheck:"പുതിയ പരിശോധന",saved:"സേവ് ചെയ്തവ",profiles:"വധൂവരൻ പ്രൊഫൈലുകൾ",brides:"വധുക്കൾ",grooms:"വരന്മാർ",bride:"വധു",groom:"വരൻ",step1:"ഘട്ടം 1 / 2",step2:"ഘട്ടം 2 / 2",person1:"ആദ്യ വ്യക്തി",person2:"രണ്ടാം വ്യക്തി",name:"പേര്",nameph:"ഉദാ. ആദിത്യ",gender:"ലിംഗം",role:"സ്ഥാനം",male:"പുരുഷൻ",female:"സ്ത്രീ",dob:"ജനന തീയതി",tob:"ജനന സമയം",unknowntime:"കൃത്യ സമയം അറിയില്ല — തീയതി മാത്രം ഉപയോഗിക്കൂ",pob:"ജനന സ്ഥലം",pobph:"ഉദാ. കൊച്ചി",continue:"തുടരൂ →",seeresult:"പൊരുത്തം കാണൂ",analyzing:"നക്ഷത്രങ്ങൾ വായിക്കുന്നു…",matchof:"പൊരുത്തം",outof:"10-ൽ",tenp:"10 പൊരുത്തങ്ങൾ",honestnote:"<b>സത്യസന്ധമായ കുറിപ്പ്:</b> പൊരുത്തം സ്വാഭാവിക ഇണക്കമാണ് അളക്കുന്നത്, വിധിയല്ല. കുറഞ്ഞ സ്കോർ എന്നാൽ കൂടുതൽ ധാരണയും സംഭാഷണവും വേണം — ഭയമല്ല. ഒരു പൊരുത്തവും 'ശപിക്കപ്പെട്ടതല്ല'.",freeused:"സൗജന്യ പരിശോധന പൂർത്തിയായി",freeusedsub:"കുടുംബത്തിലെ എല്ലാവർക്കും പരിധിയില്ലാത്ത പരിശോധനകൾ — ഒറ്റത്തവണ പേയ്മെന്റ്.",unlock:"അൺലിമിറ്റഡ് എടുക്കൂ",share:"പങ്കിടൂ",sharedemo:"ഡെമോ: ഫലം മനോഹര കാർഡായി പങ്കിടും",unlimited:"പരിധിയില്ലാത്ത പൊരുത്തം",unlimitedsub:"കുടുംബം പരിഗണിക്കുന്ന എല്ലാ ആലോചനകൾക്കും",f1:"പരിധിയില്ലാത്ത പൊരുത്ത പരിശോധനകൾ",f2:"10 പൊരുത്തങ്ങളുടെയും പൂർണ്ണ വിവരം",f3:"ആലോചനകൾ സേവ് ചെയ്ത് താരതമ്യം ചെയ്യൂ",f4:"4 ഭാഷകളിൽ, പൂർണ്ണമായും ഓഫ്‌ലൈൻ",onetime:"ഒറ്റത്തവണ · എന്നേക്കും · സബ്സ്ക്രിപ്ഷനില്ല",buynow:"തുടരൂ",notnow:"ഇപ്പോൾ വേണ്ട",fineprint:"ആപ്പ് സ്റ്റോർ വഴി സുരക്ഷിത പേയ്മെന്റ്. ആദ്യ പരിശോധന എപ്പോഴും സൗജന്യം.",storedemo:"ഡെമോ: ഇവിടെ ആപ്പ് സ്റ്റോർ പേയ്മെന്റ് തുറക്കും",appearance:"രൂപം",language:"ഭാഷ",more:"കൂടുതൽ",chooseprofile:"സേവ് ചെയ്ത പ്രൊഫൈൽ തിരഞ്ഞെടുക്കൂ",saveprofile:"പ്രൊഫൈലായി സേവ് ചെയ്യൂ",profilesaved:"പ്രൊഫൈൽ സേവ് ചെയ്തു",edit:"തിരുത്തൂ",delete:"മായ്ക്കൂ",cancel:"റദ്ദാക്കൂ",save:"സേവ് ചെയ്യൂ",addprofile:"പ്രൊഫൈൽ ചേർക്കൂ",nobrides:"ഇതുവരെ വധുക്കളില്ല — താഴെ ആദ്യത്തേത് ചേർക്കൂ.",nogrooms:"ഇതുവരെ വരന്മാരില്ല — താഴെ ആദ്യത്തേത് ചേർക്കൂ.",privacy:"സ്വകാര്യത",privacybody:"<b>എല്ലാ കണക്കുകളും നിങ്ങളുടെ ഫോണിൽ തന്നെ.</b><br><br>ജനന വിവരങ്ങൾ ഫോൺ വിട്ട് പോകില്ല, സെർവറിൽ സൂക്ഷിക്കില്ല, വിൽക്കില്ല. ഫലങ്ങൾ ശാസ്ത്രം അനുസരിച്ച് സത്യസന്ധമാണ് — ഭയമില്ല, ശാപമില്ല.",restore:"വാങ്ങലുകൾ പുനഃസ്ഥാപിക്കൂ",shareapp:"ആപ്പ് പങ്കിടൂ",version:"പൊരുത്തം · ഡിസൈൻ പ്രോട്ടോടൈപ്പ് v0.2",newprofile:"പുതിയ പ്രൊഫൈൽ",editprofile:"പ്രൊഫൈൽ തിരുത്തൂ",sharenote:"ഈ പൊരുത്തത്തിന്റെ മനോഹരമായ ഒരു പേജ് സംഗ്രഹം.",savepdf:"PDF ആയി സേവ് ചെയ്യൂ",pdfsub:"നിങ്ങളുടെ ഫോണിന്റെ പ്രിന്റ് ഡയലോഗ് വഴി"},
+ta:{tagline:"காலம் கடந்த பொருத்தம்",hero:"சம்மதம் சொல்வதற்கு முன் தெரிந்துகொள்ளுங்கள்",herosub:"பத்து பொருத்தங்களின் பாரம்பரிய கணக்கு — பயமில்லை, மூடநம்பிக்கையில்லை, சாஸ்திரம் மட்டுமே.",check:"பொருத்தம் பார்க்க →",how:"பொருத்தம் எப்படி",howbody:"தென்னிந்திய முறைப்படி மணமக்களின் சந்திர நட்சத்திரங்கள் <b>10 பொருத்தங்களில்</b> ஒப்பிடப்படுகின்றன — அன்றாட இணக்கம், குணம், வளர்ச்சி, ஈர்ப்பு, மன பந்தம் என. ஒவ்வொன்றுக்கும் தெளிவான வெற்றி/தோல்வி; 10-க்கு மொத்த மதிப்பெண் நிலையைச் சொல்லும். குறைந்த மதிப்பெண் சாபமல்ல — அதிக புரிதல் தேவை என்று மட்டுமே.",t1:"தனியுரிமை — தகவல் போனை விட்டு போகாது",t2:"யூகமல்ல, சாஸ்திர நூல்களிலிருந்து",t3:"நேர்மையான முடிவு, பயமில்லை",recent:"சமீபத்திய பார்வைகள்",back:"பின்செல்",home:"முகப்பு",newcheck:"புதிய பார்வை",saved:"சேமித்தவை",profiles:"மணமக்கள் சுயவிவரங்கள்",brides:"மணமகள்கள்",grooms:"மணமகன்கள்",bride:"மணமகள்",groom:"மணமகன்",step1:"படி 1 / 2",step2:"படி 2 / 2",person1:"முதல் நபர்",person2:"இரண்டாம் நபர்",name:"பெயர்",nameph:"எ.கா. ஆதித்யா",gender:"பாலினம்",role:"பாத்திரம்",male:"ஆண்",female:"பெண்",dob:"பிறந்த தேதி",tob:"பிறந்த நேரம்",unknowntime:"சரியான நேரம் தெரியாது — தேதி மட்டும் பயன்படுத்து",pob:"பிறந்த இடம்",pobph:"எ.கா. மதுரை",continue:"தொடர்க →",seeresult:"பொருத்தம் காண்க",analyzing:"நட்சத்திரங்கள் வாசிக்கப்படுகின்றன…",matchof:"பொருத்தம்",outof:"10-க்கு",tenp:"10 பொருத்தங்கள்",honestnote:"<b>நேர்மையான குறிப்பு:</b> பொருத்தம் இயற்கை இணக்கத்தை அளக்கிறது, விதியை அல்ல. குறைந்த மதிப்பெண் என்றால் அதிக புரிதல் தேவை — பயம் அல்ல. எந்த பொருத்தமும் 'சபிக்கப்பட்டதல்ல'.",freeused:"இலவச பார்வை முடிந்தது",freeusedsub:"குடும்பத்தினர் அனைவருக்கும் வரம்பற்ற பார்வைகள் — ஒருமுறை கட்டணம்.",unlock:"அன்லிமிடெட் பெறுக",share:"பகிர்க",sharedemo:"டெமோ: முடிவு அழகிய அட்டையாக பகிரப்படும்",unlimited:"வரம்பற்ற பொருத்தம்",unlimitedsub:"குடும்பம் பரிசீலிக்கும் ஒவ்வொரு வரனுக்கும்",f1:"வரம்பற்ற பொருத்த பார்வைகள்",f2:"10 பொருத்தங்களின் முழு விவரம்",f3:"வரன்களை சேமித்து ஒப்பிடுக",f4:"4 மொழிகளில், முழு ஆஃப்லைன்",onetime:"ஒருமுறை · என்றும் · சந்தா இல்லை",buynow:"தொடர்க",notnow:"இப்போது வேண்டாம்",fineprint:"ஆப் ஸ்டோர் வழி பாதுகாப்பான கட்டணம். முதல் பார்வை எப்போதும் இலவசம்.",storedemo:"டெமோ: இங்கே ஆப் ஸ்டோர் கட்டணம் திறக்கும்",appearance:"தோற்றம்",language:"மொழி",more:"மேலும்",chooseprofile:"சேமித்த சுயவிவரம் தேர்",saveprofile:"சுயவிவரமாக சேமி",profilesaved:"சுயவிவரம் சேமிக்கப்பட்டது",edit:"திருத்து",delete:"நீக்கு",cancel:"ரத்து",save:"சேமி",addprofile:"சுயவிவரம் சேர்",nobrides:"மணமகள்கள் இல்லை — கீழே முதலாவதை சேர்.",nogrooms:"மணமகன்கள் இல்லை — கீழே முதலாவதை சேர்.",privacy:"தனியுரிமை",privacybody:"<b>அனைத்து கணக்குகளும் உங்கள் போனிலேயே.</b><br><br>பிறப்பு விவரங்கள் போனை விட்டு போகாது, சேவையகத்தில் சேமிக்கப்படாது, விற்கப்படாது. முடிவுகள் சாஸ்திரப்படி நேர்மையானவை — பயமில்லை, சாபமில்லை.",restore:"வாங்கல்களை மீட்டெடு",shareapp:"ஆப்பை பகிர்க",version:"பொருத்தம் · வடிவமைப்பு முன்மாதிரி v0.2",newprofile:"புதிய சுயவிவரம்",editprofile:"சுயவிவரம் திருத்து",sharenote:"இந்த பொருத்தத்தின் அழகிய ஒரு பக்க சுருக்கம்.",savepdf:"PDF ஆக சேமி",pdfsub:"உங்கள் சாதனத்தின் அச்சு உரையாடல் வழி"},
+hi:{tagline:"कालातीत अनुकूलता",hero:"हाँ कहने से पहले जानिए",herosub:"दस पोरुथमों की शास्त्रीय गणना — न डर, न अंधविश्वास, केवल शास्त्र.",check:"पोरुथम देखें →",how:"मिलान कैसे होता है",howbody:"दक्षिण भारतीय परंपरा में वर-वधू के चंद्र नक्षत्रों की <b>10 पोरुथमों</b> में तुलना होती है — दैनिक सामंजस्य, स्वभाव, वृद्धि, आकर्षण, मानसिक बंधन आदि। प्रत्येक में स्पष्ट सफल/असफल; 10 में से कुल अंक स्थिति बताता है। कम अंक अभिशाप नहीं — केवल अधिक समझ की आवश्यकता है।",t1:"निजी — कुछ भी फोन से बाहर नहीं जाता",t2:"अटकल नहीं, शास्त्र ग्रंथों से",t3:"ईमानदार परिणाम, डर नहीं",recent:"हाल की जांचें",back:"पीछे",home:"होम",newcheck:"नई जांच",saved:"सहेजी हुई",profiles:"दूल्हा-दुल्हन प्रोफाइल",brides:"दुल्हनें",grooms:"दूल्हे",bride:"दुल्हन",groom:"दूल्हा",step1:"चरण 1 / 2",step2:"चरण 2 / 2",person1:"पहला व्यक्ति",person2:"दूसरा व्यक्ति",name:"नाम",nameph:"जैसे आदित्य",gender:"लिंग",role:"भूमिका",male:"पुरुष",female:"महिला",dob:"जन्म तिथि",tob:"जन्म समय",unknowntime:"सटीक समय नहीं पता — केवल तिथि से मिलान करें",pob:"जन्म स्थान",pobph:"जैसे कोच्चि",continue:"आगे बढ़ें →",seeresult:"अनुकूलता देखें",analyzing:"तारे पढ़े जा रहे हैं…",matchof:"अनुकूलता",outof:"10 में से",tenp:"10 पोरुथम",honestnote:"<b>ईमानदार नोट:</b> पोरुथम प्राकृतिक सामंजस्य मापता है, भाग्य नहीं। कम अंक का अर्थ है अधिक समझ और संवाद की आवश्यकता — डर नहीं। कोई मिलान 'शापित' नहीं होता।",freeused:"आपकी मुफ्त जांच पूरी हुई",freeusedsub:"पूरे परिवार के लिए असीमित जांचें — एक बार भुगतान, हमेशा के लिए।",unlock:"अनलिमिटेड लें",share:"साझा करें",sharedemo:"डेमो: परिणाम सुंदर कार्ड के रूप में साझा होगा",unlimited:"असीमित पोरुथम",unlimitedsub:"परिवार के हर रिश्ते के लिए",f1:"असीमित अनुकूलता जांचें",f2:"सभी 10 पोरुथमों का पूर्ण विवरण",f3:"रिश्ते सहेजें और तुलना करें",f4:"4 भाषाओं में, पूर्णतः ऑफलाइन",onetime:"एक बार · हमेशा के लिए · कोई सब्सक्रिप्शन नहीं",buynow:"आगे बढ़ें",notnow:"अभी नहीं",fineprint:"ऐप स्टोर से सुरक्षित भुगतान। पहली जांच हमेशा मुफ्त।",storedemo:"डेमो: यहां ऐप स्टोर भुगतान खुलेगा",appearance:"दिखावट",language:"भाषा",more:"और",chooseprofile:"सहेजी प्रोफाइल चुनें",saveprofile:"प्रोफाइल के रूप में सहेजें",profilesaved:"प्रोफाइल सहेजी गई",edit:"संपादित करें",delete:"हटाएं",cancel:"रद्द करें",save:"सहेजें",addprofile:"प्रोफाइल जोड़ें",nobrides:"अभी कोई दुल्हन नहीं — नीचे पहली जोड़ें।",nogrooms:"अभी कोई दूल्हा नहीं — नीचे पहला जोड़ें।",privacy:"गोपनीयता",privacybody:"<b>सारी गणना आपके फोन पर ही होती है।</b><br><br>जन्म विवरण फोन से बाहर नहीं जाता, किसी सर्वर पर संग्रहीत नहीं होता, बेचा नहीं जाता। परिणाम शास्त्रानुसार ईमानदार हैं — न डर, न शाप।",restore:"खरीदारी पुनर्स्थापित करें",shareapp:"ऐप साझा करें",version:"पोरुथम · डिज़ाइन प्रोटोटाइप v0.2",newprofile:"नई प्रोफाइल",editprofile:"प्रोफाइल संपादित करें",sharenote:"इस मिलान का सुंदर एक पृष्ठ का सारांश।",savepdf:"PDF के रूप में सहेजें",pdfsub:"आपके डिवाइस के प्रिंट संवाद के माध्यम से"}
+};
+const PORUTHAM = [
+ {en:["Dina","Day-to-day harmony between the stars"],ml:["ദിന","നക്ഷത്രങ്ങൾ തമ്മിലുള്ള ദൈനംദിന ഇണക്കം"],ta:["தின","நட்சத்திரங்களுக்கு இடையே அன்றாட இணக்கம்"],hi:["दिन","नक्षत्रों के बीच दैनिक सामंजस्य"]},
+ {en:["Gana","Temperament — do your natures align?"],ml:["ഗണം","സ്വഭാവ ഇണക്കം — പ്രകൃതങ്ങൾ ചേരുന്നുണ്ടോ?"],ta:["கண","குண இணக்கம் — இயல்புகள் ஒத்துப்போகின்றனவா?"],hi:["गण","स्वभाव — क्या आपकी प्रकृति मिलती है?"]},
+ {en:["Mahendra","Wellbeing and steadiness of the bond"],ml:["മഹേന്ദ്ര","ബന്ധത്തിന്റെ ക്ഷേമവും സ്ഥിരതയും"],ta:["மகேந்திர","பந்தத்தின் நலமும் நிலைத்தன்மையும்"],hi:["महेन्द्र","बंधन का कल्याण और स्थिरता"]},
+ {en:["Stree Deergha","Growth and prosperity together"],ml:["സ്ത്രീദീർഘ","ഒരുമിച്ചുള്ള വളർച്ചയും ഐശ്വര്യവും"],ta:["ஸ்திரீதீர்க்க","இணைந்த வளர்ச்சியும் செழிப்பும்"],hi:["स्त्रीदीर्घ","साथ में वृद्धि और समृद्धि"]},
+ {en:["Yoni","Physical and romantic compatibility"],ml:["യോനി","ശാരീരികവും പ്രണയപരവുമായ ഇണക്കം"],ta:["யோனி","உடல் மற்றும் காதல் இணக்கம்"],hi:["योनि","शारीरिक और प्रणय अनुकूलता"]},
+ {en:["Rashi","Emotional and mental harmony"],ml:["രാശി","മാനസികവും വൈകാരികവുമായ ഇണക്കം"],ta:["ராசி","மன மற்றும் உணர்வு இணக்கம்"],hi:["राशि","मानसिक और भावनात्मक सामंजस्य"]},
+ {en:["Rashi Adhipati","Mutual support between your moon signs"],ml:["രാശ്യാധിപ","ചന്ദ്രരാശികളുടെ പരസ്പര പിന്തുണ"],ta:["ராசி அதிபதி","சந்திர ராசிகளின் பரஸ்பர ஆதரவு"],hi:["राश्यधिपति","चंद्र राशियों का परस्पर सहयोग"]},
+ {en:["Vasya","Natural attraction and influence"],ml:["വശ്യ","സ്വാഭാവിക ആകർഷണവും സ്വാധീനവും"],ta:["வசிய","இயற்கை ஈர்ப்பும் செல்வாக்கும்"],hi:["वश्य","स्वाभाविक आकर्षण और प्रभाव"]},
+ {en:["Rajju","Longevity of the union"],ml:["രജ്ജു","ബന്ധത്തിന്റെ ദീർഘായുസ്സ്"],ta:["ரஜ்ஜு","பந்தத்தின் நீடிப்பு"],hi:["रज्जु","बंधन की दीर्घता"]},
+ {en:["Vedha","Freedom from afflicting combinations"],ml:["വേധ","ദോഷകരമായ യോഗങ്ങളിൽ നിന്നുള്ള മുക്തി"],ta:["வேத","தீங்கு சேர்க்கைகளிலிருந்து விடுதலை"],hi:["वेध","पीड़ादायक योगों से मुक्ति"]}
+];
+const THEMES = [
+ {id:"ivory",   name:"Classic Ivory", mode:"light", bg:"#FBF6EC", card:"#FFFFFF", brand:"#701425"},
+ {id:"rose",    name:"Rose Dawn",     mode:"light", bg:"#FDF4F1", card:"#FFFFFF", brand:"#8E2A3C"},
+ {id:"sage",    name:"Sage Meadow",   mode:"light", bg:"#F3F6EC", card:"#FFFFFF", brand:"#3F5B3A"},
+ {id:"night",   name:"Maroon Night",  mode:"dark",  bg:"#200F16", card:"#2E1822", brand:"#C86A82"},
+ {id:"charcoal",name:"Charcoal Gold", mode:"dark",  bg:"#161619", card:"#232328", brand:"#D9B545"},
+ {id:"peacock", name:"Peacock Dusk",  mode:"dark",  bg:"#0E1B21", card:"#16272F", brand:"#3AA586"}
+];
+let LANG = 'en', THEME = 'ivory', PTAB = 'bride', PICK_TARGET = null, EDIT_ID = null;
+const LANGS = [['en','English'],['ml','മലയാളം'],['ta','தமிழ்'],['hi','हिन्दी']];
+const t = k => (T[LANG] && T[LANG][k]) || T.en[k] || k;
+const phone = document.getElementById('phone');
+
+/* ================= drawer / overlays ================= */
+function toggleDrawer(open){
+  document.getElementById('drawer').classList.toggle('on', open);
+  document.getElementById('scrim').classList.toggle('on', open);
+}
+function closeOverlays(){
+  toggleDrawer(false);
+  document.querySelectorAll('.bsheet').forEach(b=>b.classList.remove('on'));
+  document.getElementById('scrim').classList.remove('on');
+}
+function openShare(){
+  document.getElementById('shareSheet').classList.add('on');
+  document.getElementById('scrim').classList.add('on');
+}
+function doPrint(){
+  closeOverlays();
+  setTimeout(()=>window.print(), 350);
+}
+function nav(id){ closeOverlays(); go(id); }
+function toast(msg){
+  const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('on');
+  clearTimeout(el._h); el._h=setTimeout(()=>el.classList.remove('on'), 1900);
+}
+
+/* ================= themes ================= */
+function setTheme(id){
+  THEME=id; phone.dataset.theme=id; renderThemes();
+}
+function renderThemes(){
+  const light=THEMES.filter(x=>x.mode==='light'), dark=THEMES.filter(x=>x.mode==='dark');
+  const modeName={light:{en:'Light',ml:'ലൈറ്റ്',ta:'ஒளி',hi:'लाइट'},dark:{en:'Dark',ml:'ഡാർക്ക്',ta:'இருள்',hi:'डार्क'}};
+  const card=x=>`<button class="swatch ${x.id===THEME?'on':''}" onclick="setTheme('${x.id}')">
+    <span class="dots"><i style="background:${x.bg};border-color:var(--line)"></i><i style="background:${x.card}"></i><i style="background:${x.brand}"></i></span>
+    <b>${x.name}</b><small>${(modeName[x.mode][LANG]||modeName[x.mode].en)}</small></button>`;
+  document.getElementById('swatches').innerHTML =
+    `<div class="dsec" style="margin:0 0 8px;grid-column:1/-1">${modeName.light[LANG]||'Light'}</div>`+light.map(card).join('')+
+    `<div class="dsec" style="margin:8px 0;grid-column:1/-1">${modeName.dark[LANG]||'Dark'}</div>`+dark.map(card).join('');
+}
+
+/* ================= language ================= */
+function applyLang(){
+  document.querySelectorAll('[data-t]').forEach(el=>{ el.innerHTML = t(el.dataset.t); });
+  document.querySelectorAll('[data-ph]').forEach(el=>{ el.placeholder = t(el.dataset.ph); });
+  document.getElementById('langBtn').textContent = LANG.toUpperCase();
+  document.getElementById('dlangs').innerHTML = LANGS.map(([c,n])=>
+    `<button class="langpill ${c===LANG?'on':''}" onclick="setLang('${c}')">${n}</button>`).join('');
+  document.getElementById('priceAmt').textContent = (LANG==='en') ? '$1.99' : '₹199';
+  renderThemes(); renderProfiles(); renderHistory();
+}
+function setLang(c){ LANG=c; applyLang(); }
+function cycleLang(){ const i=LANGS.findIndex(([c])=>c===LANG); setLang(LANGS[(i+1)%LANGS.length][0]); }
+
+/* ================= navigation ================= */
+function go(id){
+  closeOverlays();
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  phone.scrollTop=0; window.scrollTo(0,0);
+  const tabs={'s-home':'tab-home','s-p1':'tab-new','s-p2':'tab-new','s-profiles':'tab-prof','s-hist':'tab-hist'};
+  document.querySelectorAll('.tabbar button').forEach(b=>b.classList.remove('on'));
+  if(tabs[id]) document.getElementById(tabs[id]).classList.add('on');
+}
+
+/* ================= profiles ================= */
+let profiles=[
+  {id:1,name:"Diya Sharma",role:"bride",dob:"2000-09-02",tob:"18:15",unknown:false,place:"Madurai"},
+  {id:2,name:"Priya Nair",role:"bride",dob:"1999-11-14",tob:"09:40",unknown:false,place:"Kochi"},
+  {id:3,name:"Aditya Menon",role:"groom",dob:"1998-04-14",tob:"10:30",unknown:false,place:"Kochi"},
+  {id:4,name:"Rahul Varma",role:"groom",dob:"1997-01-03",tob:"",unknown:true,place:"Chennai"}
+];
+let nextId=5;
+function setPTab(r){ PTAB=r;
+  document.querySelectorAll('#ptabs button').forEach((b,i)=>b.classList.toggle('on',(i===0)===(r==='bride')));
+  renderProfiles();
+}
+function fmtDob(d){ if(!d) return "—"; const [y,m,dd]=d.split("-"); return `${dd}/${m}/${y}`; }
+function avatarColor(role){ return role==='bride' ? 'linear-gradient(135deg,var(--brand),var(--brand-d))' : 'linear-gradient(135deg,#B98A1D,#8a6d1a)'; }
+function renderProfiles(){
+  const list=profiles.filter(p=>p.role===PTAB);
+  const empty=list.length===0;
+  document.getElementById('profileList').innerHTML = empty
+    ? `<div class="empty">${t(PTAB==='bride'?'nobrides':'nogrooms')}</div>`
+    : list.map(p=>`
+    <div class="pcard">
+      <div class="pavatar" style="background:${avatarColor(p.role)}">${p.name.trim()[0]||'?'}</div>
+      <div class="meta"><b>${p.name}</b>
+        <small>${fmtDob(p.dob)}${p.unknown?" · "+t('unknowntime').split('—')[0].trim():" · "+p.tob} · ${p.place||""}</small>
+        <span class="rolebadge ${p.role==='bride'?'rb-bride':'rb-groom'}">${t(p.role)}</span>
+      </div>
+      <button class="pact" onclick="openProfileEditor(${p.id})" aria-label="${t('edit')}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3l4 4L8 20l-5 1 1-5z"/></svg></button>
+      <button class="pact" onclick="delProfile(${p.id})" aria-label="${t('delete')}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button>
+    </div>`).join('');
+  document.querySelector('#addProfBtn span').textContent = t('addprofile')+" · "+t(PTAB);
+}
+function openProfileEditor(id){
+  EDIT_ID = id||null;
+  const p = id ? profiles.find(x=>x.id===id) : null;
+  document.getElementById('peTitle').textContent = p ? t('editprofile') : t('newprofile');
+  document.getElementById('pe_name').value = p?p.name:"";
+  document.getElementById('pe_dob').value = p?p.dob:"";
+  document.getElementById('pe_tob').value = p?p.tob:"";
+  document.getElementById('pe_place').value = p?p.place:"";
+  document.getElementById('pe_u').classList.toggle('on', !!(p&&p.unknown));
+  const role = p?p.role:PTAB;
+  setSeg('pe_role', role==='bride'?0:1);
+  go('s-pedit');
+}
+function saveProfileEditor(){
+  const name=document.getElementById('pe_name').value.trim()||t('newprofile');
+  const role=getSeg('pe_role')===0?'bride':'groom';
+  const rec={name:name, role:role,
+    dob:document.getElementById('pe_dob').value,
+    tob:document.getElementById('pe_tob').value,
+    unknown:document.getElementById('pe_u').classList.contains('on'),
+    place:document.getElementById('pe_place').value.trim()};
+  if(EDIT_ID){ Object.assign(profiles.find(x=>x.id===EDIT_ID), rec); }
+  else { profiles.push(Object.assign({id:nextId++}, rec)); }
+  PTAB=role; setPTab(role); go('s-profiles'); toast(t('profilesaved'));
+}
+function delProfile(id){
+  profiles=profiles.filter(x=>x.id!==id); renderProfiles();
+}
+function setSeg(id,idx){
+  const seg=document.getElementById(id);
+  seg.querySelectorAll('button').forEach((b,i)=>b.classList.toggle('on',i===idx));
+}
+function getSeg(id){
+  const btns=[...document.getElementById(id).querySelectorAll('button')];
+  return btns.findIndex(b=>b.classList.contains('on'));
+}
+
+/* ---- pick a saved profile into a check form ---- */
+function openPicker(target){
+  PICK_TARGET=target;
+  document.getElementById('pickSub').textContent = t(target==='p1'?'person1':'person2');
+  const row=p=>`
+    <button class="brow" onclick="pickProfile(${p.id})">
+      <div class="pavatar" style="background:${avatarColor(p.role)};width:44px;height:44px;font-size:17px">${p.name.trim()[0]||'?'}</div>
+      <div class="meta"><b>${p.name}</b><br><small>${fmtDob(p.dob)} · ${p.place||""}</small></div>
+      <span class="rolebadge ${p.role==='bride'?'rb-bride':'rb-groom'}">${t(p.role)}</span>
+    </button>`;
+  const brides=profiles.filter(p=>p.role==='bride'), grooms=profiles.filter(p=>p.role==='groom');
+  document.getElementById('pickList').innerHTML =
+    (brides.length?`<div class="dsec">${t('brides')}</div>`+brides.map(row).join(''):"")+
+    (grooms.length?`<div class="dsec">${t('grooms')}</div>`+grooms.map(row).join(''):"")+
+    (!profiles.length?`<div class="empty">${t('nobrides')}</div>`:"");
+  document.getElementById('pickSheet').classList.add('on');
+  document.getElementById('scrim').classList.add('on');
+}
+function pickProfile(id){
+  const p=profiles.find(x=>x.id===id); if(!p) return;
+  const sfx=PICK_TARGET==='p1'?'1':'2';
+  document.getElementById('n'+sfx).value=p.name;
+  document.getElementById('d'+sfx).value=p.dob;
+  document.getElementById('t'+sfx).value=p.tob;
+  document.getElementById('p'+sfx).value=p.place;
+  document.getElementById('u'+sfx).classList.toggle('on', p.unknown);
+  setSeg('g'+sfx, p.role==='bride'?1:0);
+  closeOverlays();
+}
+function saveAsProfile(target){
+  const sfx=target==='p1'?'1':'2';
+  const female=getSeg('g'+sfx)===1;
+  profiles.push({id:nextId++,
+    name:document.getElementById('n'+sfx).value.trim()||t('newprofile'),
+    role:female?'bride':'groom',
+    dob:document.getElementById('d'+sfx).value,
+    tob:document.getElementById('t'+sfx).value,
+    unknown:document.getElementById('u'+sfx).classList.contains('on'),
+    place:document.getElementById('p'+sfx).value.trim()});
+  toast(t('profilesaved'));
+}
+
+/* ================= demo result engine ================= */
+function hash(s){ let h=0; for(let i=0;i<s.length;i++){ h=(h*31 + s.charCodeAt(i))>>>0; } return h; }
+let lastResult=null;
+function analyze(){
+  const n1=document.getElementById('n1').value||'Aditya', n2=document.getElementById('n2').value||'Diya';
+  go('s-run');
+  document.getElementById('plist').innerHTML = PORUTHAM.slice(0,5).map((p,i)=>
+    `<div id="pl${i}"><span>${p[LANG][0]}</span><span class="st" id="pls${i}"></span></div>`).join('');
+  let i=0;
+  const tick=setInterval(()=>{
+    if(i<5){
+      document.getElementById('pl'+i).classList.add('done');
+      const st=document.getElementById('pls'+i); st.textContent='✓'; st.style.color='var(--green)';
+      i++;
+    } else {
+      clearInterval(tick);
+      const h=hash(n1+n2), score=(6.5 + (h%30)/10).toFixed(1);
+      const passes=PORUTHAM.map((_,j)=> ((h>>(j*2))%4)!==0 );
+      const starA=["Aswini","Bharani","Rohini","Mrigashirsha"][h%4], starB=["Anusham","Kettai","Moolam","Pooradam"][(h>>3)%4];
+      lastResult={n1:n1,n2:n2,score:score,passes:passes,starA:starA,starB:starB};
+      setTimeout(()=>showResult(), 450);
+    }
+  }, 420);
+}
+function showResult(){
+  const r=lastResult, s=parseFloat(r.score);
+  document.getElementById('rNames').textContent = r.n1+' ♥ '+r.n2;
+  document.getElementById('rStars').textContent = r.starA+' × '+r.starB;
+  document.getElementById('rScore').textContent = r.score;
+  const C=452.4, ring=document.getElementById('ring');
+  ring.style.strokeDashoffset=C;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ ring.style.strokeDashoffset = C*(1-s/10); }));
+  const v=document.getElementById('rVerdict');
+  let cls,txt;
+  if(s>=8){cls='v-great';txt={en:'Excellent Match',ml:'ഉത്തമ പൊരുത്തം',ta:'சிறந்த பொருத்தம்',hi:'उत्तम मिलान'};}
+  else if(s>=6.5){cls='v-good';txt={en:'Good Match',ml:'നല്ല പൊരുത്തം',ta:'நல்ல பொருத்தம்',hi:'अच्छा मिलान'};}
+  else{cls='v-avg';txt={en:'Needs Understanding',ml:'ധാരണ വേണം',ta:'புரிதல் தேவை',hi:'समझ की आवश्यकता'};}
+  v.className='verdict '+cls; v.textContent=txt[LANG]||txt.en;
+  /* populate the printable PDF card */
+  const rows = PORUTHAM.map((p,j)=>{
+    const ok=r.passes[j];
+    return '<tr><td class="mk" style="color:'+(ok?'#2E7D4F':'#B3372F')+'">'+(ok?'✓':'✕')+'</td>'
+      +'<td><b>'+p[LANG][0]+'</b><br><span style="color:#666">'+p[LANG][1]+'</span></td></tr>';
+  }).join('');
+  document.getElementById('printArea').innerHTML =
+    '<div class="pc-head"><div class="pc-brand">☀ Porutham</div><div class="pc-tag">'+t('tagline')+'</div></div>'
+    +'<div class="pc-title">'+r.n1+' ♥ '+r.n2+'</div>'
+    +'<div class="pc-stars">'+r.starA+' × '+r.starB+'</div>'
+    +'<div class="pc-score">'+r.score+'<small>/10</small></div>'
+    +'<div class="pc-verdict"><span>'+(txt[LANG]||txt.en)+'</span></div>'
+    +'<p class="pc-reading">'+(readings[LANG]||readings.en)+'</p>'
+    +'<table class="pc-table"><tr><th></th><th>'+t('tenp')+'</th></tr>'+rows+'</table>'
+    +'<div class="pc-note">'+t('honestnote')+'</div>'
+    +'<div class="pc-foot">Porutham · '+new Date().toLocaleDateString()+'</div>';
+  const warnTxt={en:'needs attention, not worry.',ml:'ശ്രദ്ധ വേണം, ആശങ്കയല്ല.',ta:'கவனம் தேவை, கவலை அல்ல.',hi:'ध्यान चाहिए, चिंता नहीं।'};
+  const readings={
+    en:r.n1+" and "+r.n2+" score <b>"+r.score+" out of 10</b>. "+(s>=8?"The stars show strong natural harmony across nearly every measure — this is a match with real ease.":s>=6.5?"There is good natural harmony with a few areas that deserve honest conversation.":"The harmony is modest — this match will ask for patience, communication and mutual effort.")+" Nothing here is a verdict on your future; it is a map of where you align effortlessly and where you will grow together.",
+    ml:r.n1+", "+r.n2+" — <b>10-ൽ "+r.score+"</b> സ്കോർ. "+(s>=8?"മിക്കവാറും എല്ലാ അളവുകളിലും ശക്തമായ സ്വാഭാവിക ഇണക്കം — വളരെ അനായാസമായ ബന്ധം.":s>=6.5?"നല്ല സ്വാഭാവിക ഇണക്കമുണ്ട്; ചില കാര്യങ്ങളിൽ തുറന്ന സംഭാഷണം നല്ലത്.":"ഇണക്കം മിതമാണ് — ക്ഷമയും ആശയവിനിമയവും പരസ്പര പരിശ്രമവും ആവശ്യമായ ബന്ധം.")+" ഇത് നിങ്ങളുടെ ഭാവിയെക്കുറിച്ചുള്ള വിധിയല്ല; എവിടെ എളുപ്പം ചേരുന്നു, എവിടെ ഒരുമിച്ച് വളരണം എന്നതിന്റെ ഭൂപടമാണ്.",
+    ta:r.n1+", "+r.n2+" — <b>10-க்கு "+r.score+"</b> மதிப்பெண். "+(s>=8?"பெரும்பாலான அளவுகளில் வலுவான இயற்கை இணக்கம் — மிக இயல்பான பந்தம்.":s>=6.5?"நல்ல இயற்கை இணக்கம் உள்ளது; சில விஷயங்களில் வெளிப்படையான உரையாடல் நல்லது.":"இணக்கம் மிதமானது — பொறுமை, உரையாடல், பரஸ்பர முயற்சி தேவைப்படும் பந்தம்.")+" இது உங்கள் எதிர்காலத்தின் தீர்ப்பல்ல; எங்கு எளிதில் ஒத்துப்போகிறீர்கள், எங்கு இணைந்து வளர வேண்டும் என்பதன் வரைபடம்.",
+    hi:r.n1+" और "+r.n2+" — <b>10 में से "+r.score+"</b> अंक। "+(s>=8?"लगभग हर पैमाने पर मजबूत प्राकृतिक सामंजस्य — बहुत सहज बंधन।":s>=6.5?"अच्छा प्राकृतिक सामंजस्य है; कुछ बातों पर खुली बातचीत अच्छी रहेगी।":"सामंजस्य मध्यम है — धैर्य, संवाद और परस्पर प्रयास मांगने वाला बंधन।")+" यह आपके भविष्य का फैसला नहीं है; यह मानचित्र है कि कहां आप सहजता से मिलते हैं और कहां साथ बढ़ेंगे।"
+  };
+  document.getElementById('rReading').innerHTML = readings[LANG]||readings.en;
+  document.getElementById('rList').innerHTML = PORUTHAM.map((p,j)=>{
+    const ok=r.passes[j], warn=!ok && (j%3===0);
+    const cls2= ok?'p-pass':(warn?'p-warn':'p-fail'), icon= ok?'✓':(warn?'!':'✕');
+    const extra = ok?'':(warn?(' — '+(warnTxt[LANG]||warnTxt.en)):'');
+    return '<div class="prow" onclick="this.classList.toggle(\'open\')">'
+      +'<div class="head"><div class="pdot '+cls2+'">'+icon+'</div><b>'+p[LANG][0]+'</b><span class="chev">▼</span></div>'
+      +'<div class="body">'+p[LANG][1]+extra+'</div></div>';
+  }).join('');
+  go('s-res');
+}
+
+/* ================= history (demo) ================= */
+let checks=[
+  {n:'Aditya ♥ Diya', s:'8.5', d:'Oct 12'},
+  {n:'Rahul ♥ Priya', s:'7.0', d:'Oct 10'}
+];
+function saveCheck(){
+  if(lastResult) checks.unshift({n:lastResult.n1+' ♥ '+lastResult.n2, s:lastResult.score, d:'Today'});
+  renderHistory();
+}
+function scoreColor(s){ s=parseFloat(s); return s>=8?'var(--green)':(s>=6.5?'var(--amber)':'var(--red)'); }
+function renderHistory(){
+  const html = checks.length ? checks.map(c=>
+    '<div class="hcard" onclick="go(\'s-res\')"><div class="hscore" style="background:'+scoreColor(c.s)+'">'+c.s+'</div>'
+    +'<div><b>'+c.n+'</b><br><small>'+c.d+' · '+t('outof')+'</small></div><div class="go">›</div></div>'
+  ).join('') : '<div class="reading">'+t('recent')+'</div>';
+  const hh=document.getElementById('historyHome'), hl=document.getElementById('historyList');
+  if(hh) hh.innerHTML=html; if(hl) hl.innerHTML=html;
+}
+
+/* gender segmented */
+document.querySelectorAll('.seg').forEach(seg=>{
+  if(seg.id==='ptabs'||seg.id==='pe_role') return;
+  seg.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    seg.querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  });
+});
+document.querySelectorAll('#pe_role button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#pe_role button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+});
+applyLang();
+</script>
+</body>
+</html>
